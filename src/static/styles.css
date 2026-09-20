@@ -194,8 +194,8 @@ section h3 {
   position: relative;
   overflow: hidden;
   font-size: 0.85rem;
-  transition: all 0.3s ease, background-color 0.2s ease, color 0.2s ease,
-    border-color 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease,
+    background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .activity-card:hover {

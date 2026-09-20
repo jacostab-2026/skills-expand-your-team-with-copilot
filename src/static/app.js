@@ -55,10 +55,27 @@ document.addEventListener("DOMContentLoaded", () => {
     weekend: { days: ["Saturday", "Sunday"] }, // Weekend days
   };
 
+  function saveThemePreference(theme) {
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (error) {
+      console.warn("Unable to save theme preference.", error);
+    }
+  }
+
+  function loadThemePreference() {
+    try {
+      return localStorage.getItem("theme");
+    } catch (error) {
+      console.warn("Unable to load saved theme preference.", error);
+      return null;
+    }
+  }
+
   function applyTheme(theme) {
     currentTheme = theme === "dark" ? "dark" : "light";
     document.body.classList.toggle("dark-mode", currentTheme === "dark");
-    localStorage.setItem("theme", currentTheme);
+    saveThemePreference(currentTheme);
 
     const isDarkMode = currentTheme === "dark";
     themeToggle.setAttribute("aria-pressed", String(isDarkMode));
@@ -71,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initializeTheme() {
-    applyTheme(localStorage.getItem("theme"));
+    applyTheme(loadThemePreference());
   }
 
   function toggleTheme() {
