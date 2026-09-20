@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeToggle = document.getElementById("theme-toggle");
   const themeToggleText = document.getElementById("theme-toggle-text");
   const themeToggleIcon = document.getElementById("theme-toggle-icon");
+  const hasThemeToggle = themeToggle && themeToggleText && themeToggleIcon;
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -77,6 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.classList.toggle("dark-mode", currentTheme === "dark");
     if (shouldPersist) {
       saveThemePreference(currentTheme);
+    }
+
+    if (!hasThemeToggle) {
+      return;
     }
 
     const isDarkMode = currentTheme === "dark";
@@ -281,7 +286,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Event listeners for authentication
-  themeToggle.addEventListener("click", toggleTheme);
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme);
+  }
   loginButton.addEventListener("click", openLoginModal);
   logoutButton.addEventListener("click", logout);
   closeLoginModal.addEventListener("click", closeLoginModalHandler);
