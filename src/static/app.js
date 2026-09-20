@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // State for activities and filters
   let allActivities = {};
   let currentFilter = "all";
-  let currentDifficulty = "all-levels";
+  let currentDifficulty = "all-levels-only";
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
@@ -318,6 +318,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
+  function escapeHtml(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
   // Function to determine activity type (this would ideally come from backend)
   function getActivityType(activityName, description) {
     const name = activityName.toLowerCase();
@@ -452,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Apply difficulty filter
-      if (currentDifficulty === "all-levels") {
+      if (currentDifficulty === "all-levels-only") {
         if (details.difficulty) {
           return;
         }
@@ -546,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const difficultyHtml = details.difficulty
       ? `
       <div class="activity-difficulty">
-        ${details.difficulty}
+        ${escapeHtml(details.difficulty)}
       </div>
     `
       : "";
