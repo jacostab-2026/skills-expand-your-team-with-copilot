@@ -584,7 +584,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ${
                 currentUser
                   ? `
-                <span class="delete-participant tooltip" data-activity="${safeName}" data-email="${escapeHtml(email)}">
+                <span class="delete-participant tooltip">
                   ✖
                   <span class="tooltip-text">Unregister this student</span>
                 </span>
@@ -601,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${
           currentUser
             ? `
-          <button class="register-button" data-activity="${safeName}" ${
+          <button class="register-button" ${
                 isFull ? "disabled" : ""
               }>
             ${isFull ? "Activity Full" : "Register Student"}
@@ -618,8 +618,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add click handlers for delete buttons
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", handleUnregister);
+    deleteButtons.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        handleUnregister(name, details.participants[index]);
+      });
     });
 
     // Add click handler for register button (only when authenticated)
@@ -809,7 +811,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Handle unregistration with confirmation
-  async function handleUnregister(event) {
+  async function handleUnregister(activity, email) {
     // Check if user is authenticated
     if (!currentUser) {
       showMessage(
@@ -818,9 +820,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       return;
     }
-
-    const activity = event.target.dataset.activity;
-    const email = event.target.dataset.email;
 
     // Show confirmation dialog
     showConfirmationDialog(
