@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const {
+    getInitialSharedActivity,
+    getActivityShareUrl: buildActivityShareUrl,
+    getActivityShareText,
+  } = window.activityShareUtils;
+
   // DOM elements
   const activitiesList = document.getElementById("activities-list");
   const messageDiv = document.getElementById("message");
@@ -42,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentTimeRange = "";
   let sharedActivityName = "";
   const sharedActivityHighlightDurationMs = 2500;
+  let sharedActivityHighlightTimerId = null;
 
   // Authentication state
   let currentUser = null;
@@ -311,29 +318,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initializeSharedActivity() {
-    const sharedActivity = new URLSearchParams(window.location.search).get(
-      "activity"
-    );
-
-    if (!sharedActivity) {
-      return;
-    }
-
-    sharedActivityName = sharedActivity;
-    searchQuery = sharedActivity;
-    searchInput.value = sharedActivity;
-  }
-
-  function getActivityShareUrl(activityName) {
-    const shareUrl = new URL(window.location.href);
-    shareUrl.searchParams.set("activity", activityName);
-    return shareUrl.toString();
-  }
-
-  function getActivityShareText(activityName, details) {
-    return `Check out ${activityName} at Mergington High School. ${formatSchedule(
-      details
-    )}.`;
+    const sharedActivityState = getInitialSharedActivity(window.location.search);
+    sharedActivityName = sharedActivityState.sharedActivityName;
+    searchQuery = sharedActivityState.searchQuery;
+    searchInput.value = sharedActivityState.searchQuery;
   }
 
   async function copyTextToClipboard(text) {
@@ -360,8 +348,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function shareActivity(activityName, details) {
     const shareData = {
       title: `${activityName} | Mergington High School`,
-      text: getActivityShareText(activityName, details),
-      url: getActivityShareUrl(activityName),
+      text: getActivityShareText(activityName, formatSchedule(details)),
+      url: buildActivityShareUrl(window.location.href, activityName),
     };
 
     const canUseWebShare =
@@ -551,9 +539,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (matchingCard) {
+        if (sharedActivityHighlightTimerId) {
+          window.clearTimeout(sharedActivityHighlightTimerId);
+        }
+
         matchingCard.classList.add("shared-activity-highlight");
-        window.setTimeout(() => {
-          matchingCard.classList.remove("shared-activity-highlight");
+        const highlightedActivityName = sharedActivityName;
+        sharedActivityHighlightTimerId = window.setTimeout(() => {
+          const currentMatchingCard = Array.from(activitiesList.children).find(
+            (card) => {
+              const title = card.querySelector("h4");
+              return title && title.textContent === highlightedActivityName;
+            }
+          );
+
+          if (currentMatchingCard) {
+            currentMatchingCard.classList.remove("shared-activity-highlight");
+          }
+
+          sharedActivityHighlightTimerId = null;
         }, sharedActivityHighlightDurationMs);
         sharedActivityName = "";
       }
@@ -685,7 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
     copyLinkButton.textContent = "Copy Link";
     copyLinkButton.addEventListener("click", async () => {
       try {
-        await copyTextToClipboard(getActivityShareUrl(name));
+    await copyTextToClipboard(buildActivityShareUrl(window.location.href, name));
         showMessage(`Share link copied for ${name}.`, "success");
       } catch (error) {
         console.error("Error copying share link:", error);
