@@ -72,10 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function applyTheme(theme) {
+  function applyTheme(theme, shouldPersist = false) {
     currentTheme = theme === "dark" ? "dark" : "light";
     document.body.classList.toggle("dark-mode", currentTheme === "dark");
-    saveThemePreference(currentTheme);
+    if (shouldPersist) {
+      saveThemePreference(currentTheme);
+    }
 
     const isDarkMode = currentTheme === "dark";
     themeToggle.setAttribute("aria-pressed", String(isDarkMode));
@@ -92,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function toggleTheme() {
-    applyTheme(currentTheme === "dark" ? "light" : "dark");
+    applyTheme(currentTheme === "dark" ? "light" : "dark", true);
   }
 
   // Initialize filters from active elements

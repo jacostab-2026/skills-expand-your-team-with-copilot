@@ -630,10 +630,6 @@ footer {
 
 /* Responsive adjustments for mobile */
 @media (max-width: 767px) {
-  header {
-    padding-top: 52px;
-  }
-
   .sidebar-filters {
     margin-bottom: 15px;
   }
@@ -651,9 +647,9 @@ footer {
   }
 
   #user-controls {
-    left: 15px;
-    justify-content: flex-end;
-    flex-wrap: wrap;
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-end;
   }
 }
 
