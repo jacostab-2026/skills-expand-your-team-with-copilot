@@ -169,6 +169,11 @@ section h3 {
   border-color: var(--border-focus);
 }
 
+.activity-card.shared-activity-highlight {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.2);
+}
+
 .activity-card h4 {
   margin-bottom: 8px;
   color: var(--primary);
@@ -236,6 +241,33 @@ section h3 {
 
 .capacity-available .capacity-bar-fill {
   background-color: var(--success);
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 2px;
+}
+
+.share-button {
+  flex: 1;
+  min-width: 110px;
+  background-color: var(--primary-light);
+}
+
+.share-button:hover {
+  background-color: var(--primary);
+}
+
+.share-button.secondary {
+  background-color: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.share-button.secondary:hover {
+  background-color: var(--border-light);
 }
 
 /* Participants list */

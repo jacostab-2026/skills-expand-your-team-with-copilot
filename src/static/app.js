@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  let sharedActivityName = "";
 
   // Authentication state
   let currentUser = null;
@@ -308,6 +309,69 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
+  function initializeSharedActivity() {
+    const sharedActivity = new URLSearchParams(window.location.search).get(
+      "activity"
+    );
+
+    if (!sharedActivity) {
+      return;
+    }
+
+    sharedActivityName = sharedActivity;
+    searchQuery = sharedActivity;
+    searchInput.value = sharedActivity;
+  }
+
+  function getActivityShareUrl(activityName) {
+    const shareUrl = new URL(window.location.pathname, window.location.origin);
+    shareUrl.searchParams.set("activity", activityName);
+    return shareUrl.toString();
+  }
+
+  function getActivityShareText(activityName, details) {
+    return `Check out ${activityName} at Mergington High School. ${formatSchedule(
+      details
+    )}.`;
+  }
+
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    const tempInput = document.createElement("textarea");
+    tempInput.value = text;
+    tempInput.setAttribute("readonly", "");
+    tempInput.style.position = "absolute";
+    tempInput.style.left = "-9999px";
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    const copySucceeded = document.execCommand("copy");
+    document.body.removeChild(tempInput);
+
+    if (!copySucceeded) {
+      throw new Error("Clipboard copy failed");
+    }
+  }
+
+  async function shareActivity(activityName, details) {
+    const shareData = {
+      title: `${activityName} | Mergington High School`,
+      text: getActivityShareText(activityName, details),
+      url: getActivityShareUrl(activityName),
+    };
+
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+
+    await copyTextToClipboard(shareData.url);
+    showMessage(`Share link copied for ${activityName}.`, "success");
+  }
+
   // Function to determine activity type (this would ideally come from backend)
   function getActivityType(activityName, description) {
     const name = activityName.toLowerCase();
@@ -474,6 +538,19 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.entries(filteredActivities).forEach(([name, details]) => {
       renderActivityCard(name, details);
     });
+
+    if (sharedActivityName) {
+      const matchingCard = Array.from(activitiesList.children).find((card) => {
+        const title = card.querySelector("h4");
+        return title && title.textContent === sharedActivityName;
+      });
+
+      if (matchingCard) {
+        matchingCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        matchingCard.classList.add("shared-activity-highlight");
+        sharedActivityName = "";
+      }
+    }
   }
 
   // Function to render a single activity card
@@ -574,6 +651,45 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       </div>
     `;
+
+    const shareActions = document.createElement("div");
+    shareActions.className = "share-actions";
+
+    const shareButton = document.createElement("button");
+    shareButton.type = "button";
+    shareButton.className = "share-button";
+    shareButton.textContent = "Share";
+    shareButton.addEventListener("click", async () => {
+      try {
+        await shareActivity(name, details);
+      } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+
+        console.error("Error sharing activity:", error);
+        showMessage("Unable to share this activity right now.", "error");
+      }
+    });
+
+    const copyLinkButton = document.createElement("button");
+    copyLinkButton.type = "button";
+    copyLinkButton.className = "share-button secondary";
+    copyLinkButton.textContent = "Copy Link";
+    copyLinkButton.addEventListener("click", async () => {
+      try {
+        await copyTextToClipboard(getActivityShareUrl(name));
+        showMessage(`Share link copied for ${name}.`, "success");
+      } catch (error) {
+        console.error("Error copying share link:", error);
+        showMessage("Unable to copy the share link right now.", "error");
+      }
+    });
+
+    shareActions.append(shareButton, copyLinkButton);
+
+    const participantsList = activityCard.querySelector(".participants-list");
+    activityCard.insertBefore(shareActions, participantsList);
 
     // Add click handlers for delete buttons
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
@@ -868,5 +984,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize app
   checkAuthentication();
   initializeFilters();
+  initializeSharedActivity();
   fetchActivities();
 });
