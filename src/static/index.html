@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mergington High School Activities</title>
+    <script>
+      window.__initialTheme = "light";
+
+      try {
+        if (localStorage.getItem("theme") === "dark") {
+          window.__initialTheme = "dark";
+          document.documentElement.classList.add("dark-mode");
+        }
+      } catch (error) {
+        console.warn("Unable to load saved theme preference.", error);
+      }
+    </script>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,8 +23,40 @@
       <h1>Mergington High School</h1>
       <h2>Extracurricular Activities</h2>
       <div id="user-controls">
+        <button
+          id="theme-toggle"
+          class="icon-button"
+          type="button"
+          aria-label="Switch to dark mode"
+          aria-pressed="false"
+        >
+          <span id="theme-toggle-icon" aria-hidden="true">🌙</span>
+          <span id="theme-toggle-text">Dark Mode</span>
+        </button>
+        <script>
+          (() => {
+            const themeToggle = document.getElementById("theme-toggle");
+            const themeToggleIcon = document.getElementById("theme-toggle-icon");
+            const themeToggleText = document.getElementById("theme-toggle-text");
+
+            if (!themeToggle || !themeToggleIcon || !themeToggleText) {
+              return;
+            }
+
+            const isDarkMode = window.__initialTheme === "dark";
+            themeToggle.setAttribute(
+              "aria-label",
+              isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+            );
+            themeToggle.setAttribute("aria-pressed", String(isDarkMode));
+            themeToggleIcon.textContent = isDarkMode ? "☀️" : "🌙";
+            themeToggleText.textContent = isDarkMode
+              ? "Light Mode"
+              : "Dark Mode";
+          })();
+        </script>
         <div id="user-status">
-          <button id="login-button" class="icon-button">
+          <button id="login-button" class="icon-button" type="button">
             <span class="user-icon">👤</span>
             <span>Login</span>
           </button>

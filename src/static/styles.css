@@ -30,6 +30,36 @@
   --error-light: #ffebee;
   --info: #0c5460;
   --info-light: #d1ecf1;
+  --header-control-background: rgba(255, 255, 255, 0.2);
+  --header-control-background-hover: rgba(255, 255, 255, 0.3);
+}
+
+html.dark-mode {
+  --primary: #16213e;
+  --primary-light: #274472;
+  --primary-dark: #0f172a;
+  --primary-text: #f8fafc;
+  --secondary: #f59e0b;
+  --secondary-light: #fbbf24;
+  --secondary-dark: #d97706;
+  --secondary-text: #0f172a;
+  --background: #111827;
+  --surface: #1f2937;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --border: #374151;
+  --border-light: #4b5563;
+  --border-focus: #60a5fa;
+  --success: #4ade80;
+  --success-light: #14532d;
+  --warning: #fbbf24;
+  --warning-light: #78350f;
+  --error: #f87171;
+  --error-light: #7f1d1d;
+  --info: #67e8f9;
+  --info-light: #164e63;
+  --header-control-background: rgba(15, 23, 42, 0.35);
+  --header-control-background-hover: rgba(15, 23, 42, 0.55);
 }
 
 * {
@@ -48,6 +78,7 @@ body {
   padding: 12px;
   background-color: var(--background);
   font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 header {
@@ -85,6 +116,8 @@ section {
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   width: 100%;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 section h3 {
@@ -161,6 +194,8 @@ section h3 {
   position: relative;
   overflow: hidden;
   font-size: 0.85rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease,
+    background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .activity-card:hover {
@@ -610,6 +645,12 @@ footer {
   .sidebar-filters {
     width: 100%;
   }
+
+  #user-controls {
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 /* User controls in header */
@@ -617,6 +658,9 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #user-status {
@@ -639,7 +683,7 @@ footer {
   display: flex;
   align-items: center;
   gap: 5px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--header-control-background);
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 0.85rem;
@@ -647,7 +691,7 @@ footer {
 }
 
 .icon-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: var(--header-control-background-hover);
 }
 
 .user-icon {
@@ -656,11 +700,11 @@ footer {
 
 #logout-button {
   padding: 3px 10px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--header-control-background);
   font-size: 0.8rem;
   border-radius: 20px;
 }
 
 #logout-button:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: var(--header-control-background-hover);
 }
