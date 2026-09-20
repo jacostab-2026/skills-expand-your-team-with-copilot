@@ -25,10 +25,32 @@
     return `Check out ${activityName} at Mergington High School. ${scheduleText}.`;
   }
 
+  function canUseWebShare(shareData, navigatorObject) {
+    return (
+      typeof navigatorObject?.share === "function" &&
+      (typeof navigatorObject.canShare !== "function" ||
+        navigatorObject.canShare(shareData))
+    );
+  }
+
+  async function shareActivityLink(shareData, options) {
+    const { navigatorObject, copyText } = options;
+
+    if (canUseWebShare(shareData, navigatorObject)) {
+      await navigatorObject.share(shareData);
+      return "shared";
+    }
+
+    await copyText(shareData.url);
+    return "copied";
+  }
+
   const activityShareUtils = {
     getInitialSharedActivity,
     getActivityShareUrl,
     getActivityShareText,
+    canUseWebShare,
+    shareActivityLink,
   };
 
   if (typeof module !== "undefined" && module.exports) {

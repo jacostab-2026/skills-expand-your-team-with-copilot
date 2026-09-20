@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     getInitialSharedActivity,
     getActivityShareUrl: buildActivityShareUrl,
     getActivityShareText,
+    shareActivityLink,
   } = window.activityShareUtils;
 
   // DOM elements
@@ -352,17 +353,14 @@ document.addEventListener("DOMContentLoaded", () => {
       url: buildActivityShareUrl(window.location.href, activityName),
     };
 
-    const canUseWebShare =
-      typeof navigator.share === "function" &&
-      (typeof navigator.canShare !== "function" || navigator.canShare(shareData));
+    const shareResult = await shareActivityLink(shareData, {
+      navigatorObject: navigator,
+      copyText: copyTextToClipboard,
+    });
 
-    if (canUseWebShare) {
-      await navigator.share(shareData);
-      return;
+    if (shareResult === "copied") {
+      showMessage(`Share link copied for ${activityName}.`, "success");
     }
-
-    await copyTextToClipboard(shareData.url);
-    showMessage(`Share link copied for ${activityName}.`, "success");
   }
 
   // Function to determine activity type (this would ideally come from backend)
@@ -670,6 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
     shareButton.type = "button";
     shareButton.className = "share-button";
     shareButton.textContent = "Share";
+    shareButton.setAttribute("aria-label", `Share ${name}`);
     shareButton.addEventListener("click", async () => {
       try {
         await shareActivity(name, details);
@@ -687,10 +686,13 @@ document.addEventListener("DOMContentLoaded", () => {
     copyLinkButton.type = "button";
     copyLinkButton.className = "share-button secondary";
     copyLinkButton.textContent = "Copy Link";
+    copyLinkButton.setAttribute("aria-label", `Copy share link for ${name}`);
     copyLinkButton.addEventListener("click", async () => {
       try {
-    await copyTextToClipboard(buildActivityShareUrl(window.location.href, name));
-        showMessage(`Share link copied for ${name}.`, "success");
+    await copyTextToClipboard(
+      buildActivityShareUrl(window.location.href, name)
+    );
+    showMessage(`Share link copied for ${name}.`, "success");
       } catch (error) {
         console.error("Error copying share link:", error);
         showMessage("Unable to copy the share link right now.", "error");
