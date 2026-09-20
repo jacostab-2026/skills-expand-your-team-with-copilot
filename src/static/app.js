@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("activity-search");
   const searchButton = document.getElementById("search-button");
   const categoryFilters = document.querySelectorAll(".category-filter");
+  const difficultyFilters = document.querySelectorAll(".difficulty-filter");
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
 
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // State for activities and filters
   let allActivities = {};
   let currentFilter = "all";
+  let currentDifficulty = "";
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
@@ -115,6 +117,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeTimeFilter = document.querySelector(".time-filter.active");
     if (activeTimeFilter) {
       currentTimeRange = activeTimeFilter.dataset.time;
+    }
+
+    // Initialize difficulty filter
+    const activeDifficultyFilter = document.querySelector(
+      ".difficulty-filter.active"
+    );
+    if (activeDifficultyFilter) {
+      currentDifficulty = activeDifficultyFilter.dataset.difficulty;
     }
   }
 
@@ -363,6 +373,15 @@ document.addEventListener("DOMContentLoaded", () => {
     return details.schedule;
   }
 
+  function escapeHtml(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
   // Function to determine activity type (this would ideally come from backend)
   function getActivityType(activityName, description) {
     const name = activityName.toLowerCase();
@@ -496,11 +515,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      // Apply difficulty filter
+      if (currentDifficulty === "all-levels-only") {
+        if (details.difficulty) {
+          return;
+        }
+      } else if (currentDifficulty && details.difficulty !== currentDifficulty) {
+        return;
+      }
+
       // Apply search filter
       const searchableContent = [
         name.toLowerCase(),
         details.description.toLowerCase(),
         formatSchedule(details).toLowerCase(),
+        (details.difficulty || "All Levels").toLowerCase(),
       ].join(" ");
 
       if (
@@ -557,6 +586,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const safeName = escapeHtml(name);
+    const safeDescription = escapeHtml(details.description);
+    const safeSchedule = escapeHtml(formattedSchedule);
 
     // Create activity tag
     const tagHtml = `
@@ -578,12 +610,21 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    const difficultyHtml = details.difficulty
+      ? `
+      <div class="activity-difficulty">
+        ${escapeHtml(details.difficulty)}
+      </div>
+    `
+      : "";
+
     activityCard.innerHTML = `
       ${tagHtml}
-      <h4>${name}</h4>
-      <p>${details.description}</p>
+      <h4>${safeName}</h4>
+      <p>${safeDescription}</p>
+      ${difficultyHtml}
       <p class="tooltip">
-        <strong>Schedule:</strong> ${formattedSchedule}
+        <strong>Schedule:</strong> ${safeSchedule}
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
@@ -594,11 +635,11 @@ document.addEventListener("DOMContentLoaded", () => {
             .map(
               (email) => `
             <li>
-              ${email}
+              ${escapeHtml(email)}
               ${
                 currentUser
                   ? `
-                <span class="delete-participant tooltip" data-activity="${name}" data-email="${email}">
+                <span class="delete-participant tooltip">
                   ✖
                   <span class="tooltip-text">Unregister this student</span>
                 </span>
@@ -615,7 +656,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${
           currentUser
             ? `
-          <button class="register-button" data-activity="${name}" ${
+          <button class="register-button" ${
                 isFull ? "disabled" : ""
               }>
             ${isFull ? "Activity Full" : "Register Student"}
@@ -632,8 +673,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add click handlers for delete buttons
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
-    deleteButtons.forEach((button) => {
-      button.addEventListener("click", handleUnregister);
+    deleteButtons.forEach((button, index) => {
+      button.addEventListener("click", () => {
+        handleUnregister(name, details.participants[index]);
+      });
     });
 
     // Add click handler for register button (only when authenticated)
@@ -670,6 +713,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Update current filter and display filtered activities
       currentFilter = button.dataset.category;
+      displayFilteredActivities();
+    });
+  });
+
+  // Add event listeners to difficulty filter buttons
+  difficultyFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+      difficultyFilters.forEach((btn) => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-pressed", "false");
+      });
+      button.classList.add("active");
+      button.setAttribute("aria-pressed", "true");
+
+      currentDifficulty = button.dataset.difficulty;
       displayFilteredActivities();
     });
   });
@@ -812,7 +870,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Handle unregistration with confirmation
-  async function handleUnregister(event) {
+  async function handleUnregister(activity, email) {
     // Check if user is authenticated
     if (!currentUser) {
       showMessage(
@@ -821,9 +879,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       return;
     }
-
-    const activity = event.target.dataset.activity;
-    const email = event.target.dataset.email;
 
     // Show confirmation dialog
     showConfirmationDialog(
