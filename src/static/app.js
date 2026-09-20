@@ -551,7 +551,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (matchingCard) {
-        matchingCard.scrollIntoView({ behavior: "smooth", block: "start" });
         matchingCard.classList.add("shared-activity-highlight");
         window.setTimeout(() => {
           matchingCard.classList.remove("shared-activity-highlight");
