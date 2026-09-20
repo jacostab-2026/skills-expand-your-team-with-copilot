@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const activityInput = document.getElementById("activity");
   const closeRegistrationModal = document.querySelector(".close-modal");
+  const themeRoot = document.documentElement;
 
   // Search and filter elements
   const searchInput = document.getElementById("activity-search");
@@ -75,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyTheme(theme, shouldPersist = false) {
     currentTheme = theme === "dark" ? "dark" : "light";
-    document.body.classList.toggle("dark-mode", currentTheme === "dark");
+    themeRoot.classList.toggle("dark-mode", currentTheme === "dark");
     if (shouldPersist) {
       saveThemePreference(currentTheme);
     }

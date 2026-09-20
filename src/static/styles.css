@@ -34,7 +34,7 @@
   --header-control-background-hover: rgba(255, 255, 255, 0.3);
 }
 
-body.dark-mode {
+html.dark-mode {
   --primary: #16213e;
   --primary-light: #274472;
   --primary-dark: #0f172a;
