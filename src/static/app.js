@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getActivityShareUrl(activityName) {
-    const shareUrl = new URL(window.location.pathname, window.location.origin);
+    const shareUrl = new URL(window.location.href);
     shareUrl.searchParams.set("activity", activityName);
     return shareUrl.toString();
   }
@@ -548,6 +548,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (matchingCard) {
         matchingCard.scrollIntoView({ behavior: "smooth", block: "start" });
         matchingCard.classList.add("shared-activity-highlight");
+        window.setTimeout(() => {
+          matchingCard.classList.remove("shared-activity-highlight");
+        }, 2500);
         sharedActivityName = "";
       }
     }
