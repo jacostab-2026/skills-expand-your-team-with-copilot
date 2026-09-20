@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentDay = "";
   let currentTimeRange = "";
   let sharedActivityName = "";
+  const sharedActivityHighlightDurationMs = 2500;
 
   // Authentication state
   let currentUser = null;
@@ -363,7 +364,11 @@ document.addEventListener("DOMContentLoaded", () => {
       url: getActivityShareUrl(activityName),
     };
 
-    if (navigator.share) {
+    const canUseWebShare =
+      typeof navigator.share === "function" &&
+      (typeof navigator.canShare !== "function" || navigator.canShare(shareData));
+
+    if (canUseWebShare) {
       await navigator.share(shareData);
       return;
     }
@@ -550,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
         matchingCard.classList.add("shared-activity-highlight");
         window.setTimeout(() => {
           matchingCard.classList.remove("shared-activity-highlight");
-        }, 2500);
+        }, sharedActivityHighlightDurationMs);
         sharedActivityName = "";
       }
     }
